@@ -11994,7 +11994,7 @@
             }
 
             for _, setting in ipairs(settingsList) do
-                local configPath = configFolder .. "/" .. setting .. ".txt"
+                local configPath = ez_folder_settings .. "/" .. setting .. ".txt"
                 
                 if isfile(configPath) then
                     local configValue = readfile(configPath)
