@@ -6889,7 +6889,7 @@
             if dislikeButton then
                 local Avatar_UI = getgenv().Workspace:FindFirstChild("PartStorage"):FindFirstChild("AvatarUI")
                 local dislikingButton = Avatar_UI:FindFirstChild("DislikeButton") or Avatar_UI:WaitForChild("DislikeButton")
-                local Click_Detector_Input = dislikeButton:FindFirstChild("ClickDetector")
+                local Click_Detector_Input = dislikingButton:FindFirstChild("ClickDetector")
                 
                 if fireclickdetector then
                     getgenv().Disliking = true
