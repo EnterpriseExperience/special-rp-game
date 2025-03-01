@@ -1552,114 +1552,130 @@
     local cmdp = game.Players
     local cmdlp = cmdp.LocalPlayer
 
-    function findplr(args, tbl)
-        local tbl = game:GetService("Players"):GetPlayers() or game:GetService("Players"):GetChildren()
+    function findplr(args)
+        local tbl = game:GetService("Players"):GetPlayers()
 
-        if args == "me" then
+        if args == "me" or args == cmdlp.Name or args == cmdlp.DisplayName then
             return getgenv().notify("Failure!", "You cannot target yourself!", 6)
-        elseif args == cmdlp or game.Players.LocalPlayer or game.Players.LocalPlayer.Name or cmdlp.Character.Name then
-            return getgenv().notify("Failure!", "You cannot target yourself!", 6)
-        elseif args == "random" then 
-            local randomPlr
+        end
+
+        if args == "random" then
             local validPlayers = {}
             for _, v in pairs(tbl) do
                 if v ~= cmdlp then
                     table.insert(validPlayers, v)
                 end
             end
-            if #validPlayers == 0 then return nil end
-            return validPlayers[math.random(1, #validPlayers)]
-        elseif args == "new" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if v.AccountAge < 30 and v ~= cmdlp then
-                    vAges[#vAges+1] = v
-                end
-            end
-            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "old" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if v.AccountAge > 30 and v ~= cmdlp then
-                    vAges[#vAges+1] = v
-                end
-            end
-            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "bacon" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if v.Character:FindFirstChild("Pal Hair") or v.Character:FindFirstChild("Kate Hair") and v ~= cmdlp then
-                    vAges[#vAges+1] = v
-                end
-            end
-            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "friend" then
-            local vAges = {} 
-            for _, v in pairs(tbl) do
-                if v:IsFriendsWith(cmdlp.UserId) and v ~= cmdlp then
-                    vAges[#vAges+1] = v
-                end
-            end
-            if #vAges > 0 then
-                return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-            else
-                return nil
-            end
-        elseif args == "notfriend" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if not v:IsFriendsWith(cmdlp.UserId) and v ~= cmdlp then
-                    vAges[#vAges+1] = v
-                end
-            end
-            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "ally" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if v.Team == cmdlp.Team and v ~= cmdlp then
-                    vAges[#vAges+1] = v
-                end
-            end
-            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "enemy" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if v.Team ~= cmdlp.Team then
-                    vAges[#vAges+1] = v
-                end
-            end
-            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "near" then
+            return #validPlayers > 0 and validPlayers[math.random(1, #validPlayers)] or nil
+        end
+
+        if args == "new" then
             local vAges = {}
             for _, v in pairs(tbl) do
-                if v and v ~= cmdlp and v.Character and cmdlp.Character then
+                if v.AccountAge < 30 and v ~= cmdlp then
+                    table.insert(vAges, v)
+                end
+            end
+            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+        end
+
+        if args == "old" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if v.AccountAge > 30 and v ~= cmdlp then
+                    table.insert(vAges, v)
+                end
+            end
+            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+        end
+
+        if args == "bacon" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if v ~= cmdlp and (v.Character:FindFirstChild("Pal Hair") or v.Character:FindFirstChild("Kate Hair")) then
+                    table.insert(vAges, v)
+                end
+            end
+            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+        end
+
+        if args == "friend" then
+            local friendList = {}
+            for _, v in pairs(tbl) do
+                if v:IsFriendsWith(cmdlp.UserId) and v ~= cmdlp then
+                    table.insert(friendList, v)
+                end
+            end
+            return #friendList > 0 and friendList[math.random(1, #friendList)] or nil
+        end
+
+        if args == "notfriend" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if not v:IsFriendsWith(cmdlp.UserId) and v ~= cmdlp then
+                    table.insert(vAges, v)
+                end
+            end
+            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+        end
+
+        if args == "ally" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if v.Team == cmdlp.Team and v ~= cmdlp then
+                    table.insert(vAges, v)
+                end
+            end
+            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+        end
+
+        if args == "enemy" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if v.Team ~= cmdlp.Team and v ~= cmdlp then
+                    table.insert(vAges, v)
+                end
+            end
+            return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
+        end
+
+        if args == "near" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if v ~= cmdlp and v.Character and cmdlp.Character then
                     local vRootPart = v.Character:FindFirstChild("HumanoidRootPart")
                     local cmdlpRootPart = cmdlp.Character:FindFirstChild("HumanoidRootPart")
                     if vRootPart and cmdlpRootPart then
                         local distance = (vRootPart.Position - cmdlpRootPart.Position).magnitude
                         if distance < 30 then
-                            vAges[#vAges + 1] = v
+                            table.insert(vAges, v)
                         end
                     end
                 end
             end
             return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        elseif args == "far" then
-            local vAges = {} 
-            for _,v in pairs(tbl) do
-                if v ~= cmdlp then
-                    local math = (v.Character:FindFirstChild("HumanoidRootPart").Position - cmdlp.Character.HumanoidRootPart.Position).magnitude
-                    if math > 30 then
-                        vAges[#vAges+1] = v
+        end
+
+        if args == "far" then
+            local vAges = {}
+            for _, v in pairs(tbl) do
+                if v ~= cmdlp and v.Character and cmdlp.Character then
+                    local vRootPart = v.Character:FindFirstChild("HumanoidRootPart")
+                    local cmdlpRootPart = cmdlp.Character:FindFirstChild("HumanoidRootPart")
+                    if vRootPart and cmdlpRootPart then
+                        local distance = (vRootPart.Position - cmdlpRootPart.Position).magnitude
+                        if distance > 30 then
+                            table.insert(vAges, v)
+                        end
                     end
                 end
             end
             return #vAges > 0 and vAges[math.random(1, #vAges)] or nil
-        else 
-            for _, v in pairs(tbl) do
-                if (v.Name:lower():find(args:lower()) or v.DisplayName:lower():find(args:lower())) and v ~= cmdlp then
-                    return v
-                end
+        end
+
+        for _, v in pairs(tbl) do
+            if (v.Name:lower():find(args:lower()) or v.DisplayName:lower():find(args:lower())) and v ~= cmdlp then
+                return v
             end
         end
     end
@@ -2556,84 +2572,9 @@
     end
     wait()
     getgenv().TPOwnerBruh = Tab1:CreateButton({
-    Name = "Teleport To: Owner Of Script",
+    Name = "Teleport To: Owner Of Script (WORKING!)",
     Callback = function()
-        local TeleportService = getgenv().TeleportService
-        local Players = getgenv().Players
-        local Character = getgenv().Character
-
-        local OwnerNames = { "L0CKED_1N1", "CHEATING_B0SS" }
-        local PlaceIDs = { 6884319169, 15546218972 }
-
-        local function retrieve_players_data()
-            for _, Owner in ipairs(OwnerNames) do
-                for _, player in ipairs(Players:GetPlayers()) do
-                    if player.Name == Owner then
-                        return player
-                    end
-                end
-            end
-            return nil
-        end
-
-        local function grab_owner_found()
-            for _, Owner in ipairs(OwnerNames) do
-                for _, player in ipairs(Players:GetPlayers()) do
-                    if player.Name == Owner then
-                        return true
-                    end
-                end
-            end
-            return false
-        end
-
-        local plr_found = retrieve_players_data()
-        local owner_found = grab_owner_found()
-
-        local function grab_user_id(username)
-            local success, userId = pcall(function()
-                return Players:GetUserIdFromNameAsync(username)
-            end)
-            return success and userId or nil
-        end
-
-        local function tp_to_owner_found_server()
-            local LocalPlayer = Players.LocalPlayer
-
-            for _, ownerName in ipairs(OwnerNames) do
-                local ownerUserId = grab_user_id(ownerName)
-
-                if ownerUserId then
-                    local success, result = pcall(function()
-                        return TeleportService:GetPlayerPlaceInstanceAsync(ownerUserId)
-                    end)
-
-                    if success and result and result.InstanceId then
-                        getgenv().notify("Teleporting", "Joining " .. ownerName .. "'s server...", 6.5)
-                        TeleportService:TeleportToPlaceInstance(result.PlaceId, result.InstanceId, LocalPlayer)
-                        return
-                    end
-                end
-            end
-
-            for _, placeId in ipairs(PlaceIDs) do
-                getgenv().notify("Teleporting", "Joining fallback server...", 6.5)
-                TeleportService:Teleport(placeId, LocalPlayer)
-                return
-            end
-
-            getgenv().notify("Teleport Failed", "Could not find a suitable server.", 6.5)
-        end
-
-        local function do_teleport_check()
-            tp_to_owner_found_server()
-        end
-
-        if owner_found and plr_found and plr_found.Character and plr_found.Character:FindFirstChild("Humanoid") then
-            Character:PivotTo(plr_found.Character:GetPivot())
-        else
-            do_teleport_check()
-        end
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EnterpriseExperience/special-rp-game/refs/heads/main/ultra_rare.lua'))()
     end,})
 
     getgenv().ViewOwnerBruh = Tab1:CreateToggle({
@@ -2643,14 +2584,16 @@
     Callback = function(viewingOwner)
         if viewingOwner then
             getgenv().spectateOwner = true
-            local OwnerName = "L0CKED_1N1" or "CHEATING_B0SS" or "adorxfleurys"
+            local OwnerName = "L0CKED_1N1" or "CHEATING_B0SS"
             local Workspace = getgenv().Workspace
             local Camera = Workspace:FindFirstChild("Camera")
-            if not getgenv().Players:FindFirstChild(OwnerName) then return warn("Owner not found!") end
+            if not getgenv().Players:FindFirstChild(OwnerName) then
+                getgenv().ViewOwnerBruh:Set(false)
+                wait(0.1)
+                getgenv().Camera = getgenv().Character or getgenv().Humanoid
+            end
         
-            if game.Players:FindFirstChild(OwnerName) then
-                print("Owner Found! Viewing...")
-                task.wait()
+            if getgenv().Players:FindFirstChild(OwnerName) then
                 local OwnerOfScript = game.Players:FindFirstChild(OwnerName)
                 local Owner_Char = OwnerOfScript.Character
                 Camera.CameraSubject = Owner_Char
@@ -7027,6 +6970,16 @@
 
     if game.PlaceId == 6884319169 or game.PlaceId == 15546218972 then
         if fireclickdetector then
+            local function findFriendPlayer()
+                local Local_Player = getgenv().LocalPlayer
+                for _, player in ipairs(getgenv().Players:GetPlayers()) do
+                    if player ~= Local_Player and Local_Player:IsFriendsWith(player.UserId) then
+                        return player
+                    end
+                end
+                return nil
+            end
+            wait(0.1)
             getgenv().WhitelistFriendPlr = Tab1:CreateToggle({
             Name = "[Avatar-UI]: Auto Like Friends",
             CurrentValue = false,
@@ -7041,7 +6994,7 @@
                     
                     local Local_Player = getgenv().LocalPlayer
                     
-                    local friend_find = findplr("friend")
+                    local friend_find = findFriendPlayer()
                     
                     if not friend_find then
                         getgenv().WhitelistFriendPlr:Set(false)
