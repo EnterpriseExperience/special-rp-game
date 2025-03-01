@@ -8659,16 +8659,17 @@
     end,})--]]
     if game.PlaceId == 6884319169 or game.PlaceId == 15546218972 or game.PlaceId == 80080558412215 then
         local boardCount = 0
+        local boards = {}
 
         for _, model in pairs(workspace:GetDescendants()) do
             if model:IsA("Model") and model.Name == "Tic Tac Toe" then
-                local parent_to = game:GetService("Workspace"):FindFirstChild("PartStorage")
+                local parent_to = getgenv().Workspace:FindFirstChild("PartStorage")
                 if parent_to then
                     boardCount = boardCount + 1
                     model.Name = "Tic Tac Toe " .. boardCount
-                    
                     model.Parent = parent_to
-
+                    boards[boardCount] = model
+                    
                     if model.Parent == parent_to then
                         print("Renamed & Moved: Tic Tac Toe " .. boardCount)
                     else
@@ -8679,27 +8680,26 @@
                 end
             end
         end
-        -- I hate this shit, and I hate this script I won't even lie.
-        wait(0.3)
+
+        function clickBoard(boardName)
+            local board = getgenv().Workspace:FindFirstChild("PartStorage"):FindFirstChild(boardName)
+            if board then
+                for _, v in ipairs(board:GetDescendants()) do
+                    if v:IsA("ClickDetector") then
+                        fireclickdetector(v, 999)
+                    end
+                end
+            else
+                warn("Board not found: " .. tostring(boardName))
+            end
+        end
+
         getgenv().ClickingAllBoards = Tab5:CreateButton({
         Name = "Click All TicTacToe Boards",
         Callback = function()
-            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 1"]:GetDescendants()) do
-                if v:IsA("ClickDetector") then
-                    fireclickdetector(v, 999)
-                end
-            end
-            wait()
-            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 2"]:GetDescendants()) do
-                if v:IsA("ClickDetector") then
-                    fireclickdetector(v, 999)
-                end
-            end
-            wait()
-            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 3"]:GetDescendants()) do
-                if v:IsA("ClickDetector") then
-                    fireclickdetector(v, 999)
-                end
+            for i = 1, boardCount do
+                clickBoard("Tic Tac Toe " .. i)
+                wait()
             end
         end,})
 
@@ -8708,61 +8708,31 @@
         CurrentValue = false,
         Flag = "loopClickingAllBoards",
         Callback = function(ClickAll)
-            if ClickAll then
-                getgenv().doAllClicks = true
-                while getgenv().doAllClicks do
-                    wait(0.6)
-                    for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 1"]:GetDescendants()) do
-                        if v:IsA("ClickDetector") then
-                            fireclickdetector(v, 999)
-                        end
-                    end
-                    wait()
-                    for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 2"]:GetDescendants()) do
-                        if v:IsA("ClickDetector") then
-                            fireclickdetector(v, 999)
-                        end
-                    end
-                    wait()
-                    for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 3"]:GetDescendants()) do
-                        if v:IsA("ClickDetector") then
-                            fireclickdetector(v, 999)
-                        end
-                    end
+            getgenv().doAllClicks = ClickAll
+            while getgenv().doAllClicks == true do
+                for i = 1, boardCount do
+                    clickBoard("Tic Tac Toe " .. i)
                 end
-            else
-                getgenv().doAllClicks = false
+                wait(0.7)
             end
         end,})
 
-        getgenv().ClickTicTacToeBoard2 = Tab5:CreateButton({
+        getgenv().ClickBoardNumberOne = Tab5:CreateButton({
         Name = "Click TicTacToe Board 1",
         Callback = function()
-            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 1"]:GetDescendants()) do
-                if v:IsA("ClickDetector") then
-                    fireclickdetector(v, 999)
-                end
-            end
+            clickBoard("Tic Tac Toe 1")
         end,})
 
-        getgenv().ClickTicTacToeBoard2 = Tab5:CreateButton({
+        getgenv().ClickBoardNumberTwo = Tab5:CreateButton({
         Name = "Click TicTacToe Board 2",
         Callback = function()
-            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 2"]:GetDescendants()) do
-                if v:IsA("ClickDetector") then
-                    fireclickdetector(v, 999)
-                end
-            end
+            clickBoard("Tic Tac Toe 2")
         end,})
-        
-        getgenv().ClickTicTacToeBoard2 = Tab5:CreateButton({
+
+        getgenv().ClickBoardNumberThree = Tab5:CreateButton({
         Name = "Click TicTacToe Board 3",
         Callback = function()
-            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 3"]:GetDescendants()) do
-                if v:IsA("ClickDetector") then
-                    fireclickdetector(v, 999)
-                end
-            end
+            clickBoard("Tic Tac Toe 3")
         end,})
     else
         warn("Not MIC UP or MIC UP 17+ or German Hangout (VC), not loading these TicTacToe options.")
