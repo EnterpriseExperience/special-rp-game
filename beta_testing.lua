@@ -2707,6 +2707,8 @@
                     "SourceSans",
                 }
 
+                local Folder = getgenv().Workspace:FindFirstChild("Booth")
+
                 local function getStall()
                     for _, v in pairs(Folder:GetChildren()) do
                         local usernameGui = v:FindFirstChild("Username") and v.Username:FindFirstChild("BillboardGui")
