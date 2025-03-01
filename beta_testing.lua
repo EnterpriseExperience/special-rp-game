@@ -2465,67 +2465,64 @@
     getgenv().RainbowBaseplate_Speed_Value = getgenv().RainbowBaseplate_Speed_Value or 0.5
     getgenv().RainbowSpeed = getgenv().RainbowSpeed or 2
     wait(0.1)
-    getgenv().RainbowBaseplate = Tab22:CreateToggle({
+    getgenv().RainbowBaseplate = Tab22:CreateToggle({ 
     Name = "Rainbow Baseplate",
     CurrentValue = false,
     Flag = "rainbowRGBBaseplateToggle",
     Callback = function(turnOnRGBPart)
-        if turnOnRGBPart then
-            local RunService = cloneref and cloneref(game:GetService("RunService")) or game:GetService("RunService")
-            local Workspace = cloneref and cloneref(game:GetService("Workspace")) or game:GetService("Workspace")
-            local TerrainFolder = Workspace:FindFirstChild("TERRAIN_EDITOR") or Instance.new("Folder", Workspace)
-            TerrainFolder.Name = "TERRAIN_EDITOR"
+        local RunService = getgenv().RunService
+        local Workspace = getgenv().Workspace
 
+        local TerrainFolder = Workspace:FindFirstChild("TERRAIN_EDITOR")
+        if not TerrainFolder then
+            return warn("TERRAIN_EDITOR folder not found in Workspace.")
+        end
+
+        local colors = {
+            BrickColor.new("Toothpaste"),
+            BrickColor.new("Really black"),
+            BrickColor.new("White"),
+            BrickColor.new("Grey"),
+            BrickColor.new("Bright red"),
+            BrickColor.new("Hot pink"),
+            BrickColor.new("Royal purple"),
+            BrickColor.new("Lime green"),
+            BrickColor.new("Pink"),
+            BrickColor.new("Burnt Sienna"),
+            BrickColor.new("Tr. Bright bluish violet"),
+            BrickColor.new("Gold"),
+            BrickColor.new("Deep orange")
+        }
+
+        local colorIndex = 1
+
+        if turnOnRGBPart then
             getgenv().ultra_rainbow = true
 
-            local colors = {
-                BrickColor.new("Toothpaste"),
-                BrickColor.new("Really black"),
-                BrickColor.new("White"),
-                BrickColor.new("Grey"),
-                BrickColor.new("Bright red"),
-                BrickColor.new("Hot pink"),
-                BrickColor.new("Royal purple"),
-                BrickColor.new("Lime green"),
-                BrickColor.new("Pink"),
-                BrickColor.new("Burnt Sienna"),
-                BrickColor.new("Tr. Bright bluish violet"),
-                BrickColor.new("Gold"),
-                BrickColor.new("Deep orange")
-            }
+            getgenv().connection = RunService.RenderStepped:Connect(function()
+                if not getgenv().ultra_rainbow then
+                    if getgenv().connection then
+                        getgenv().connection:Disconnect()
+                    end
+                    return getgenv().notify("Quitting", "Stopping connection, it was already enabled.", 6)
+                end
 
-            local colorIndex = 1
-
-            local function updateColors()
-                if not getgenv().ultra_rainbow then return end
-                for _, v in ipairs(TerrainFolder:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        if getgenv().RainbowBaseplate_Speed_Value then
-                            wait(tonumber(getgenv().RainbowBaseplate_Speed_Value))
-                        else
-                            getgenv().ultra_rainbow = false
-                            getgenv().RainbowBaseplate:Set(false)
-                        end
-                        v.BrickColor = colors[colorIndex]
+                for _, part in ipairs(TerrainFolder:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.BrickColor = colors[colorIndex]
                     end
                 end
-                colorIndex = (colorIndex % #colors) + 1
-            end
 
-            local connection
-            connection = RunService.RenderStepped:Connect(function()
-                if not getgenv().ultra_rainbow then
-                    connection:Disconnect()
-                    return
-                end
-                updateColors()
+                colorIndex = (colorIndex % #colors) + 1
+                task.wait(getgenv().RainbowBaseplate_Speed_Value)
             end)
         else
             getgenv().ultra_rainbow = false
+            wait(0.2)
             getgenv().ultra_rainbow = false
-            getgenv().ultra_rainbow = false
-            for i = 1, 20 do
-                getgenv().ultra_rainbow = false
+            wait(0.1)
+            if getgenv().connection then
+                getgenv().connection:Disconnect()
             end
         end
     end,})
@@ -5148,15 +5145,32 @@
                 BasePlate.Transparency = BasePlateMICUPTransparency
                 Texture_Bruh.Transparency = BasePlateMICUPTransparency
             elseif game:GetService("Workspace"):FindFirstChild("BasePlate") then
-                local BasePlate = game:GetService("Workspace"):FindFirstChild("BasePlate")
+                local BasePlate
+                wait(0.2)
+                if getgenv().Workspace:FindFirstChild("Baseplate") then
+                    BasePlate = getgenv().Workspace:FindFirstChild("BasePlate") or getgenv().Workspace:FindFirstChild("Baseplate")
 
-                BasePlate.Transparency = BasePlateMICUPTransparency
+                    BasePlate.Transparency = BasePlateMICUPTransparency
+                elseif not getgenv().Workspace:FindFirstChild("Baseplate") then
+                    BasePlate = getgenv().Workspace:FindFirstChild("BasePlate")
+
+                    BasePlate.Transparency = BasePlateMICUPTransparency
+                end
             elseif game:GetService("Workspace"):FindFirstChild("Game") then
-                local BasePlate = game:GetService("Workspace"):FindFirstChild("Game"):FindFirstChild("Baseplate")
-                local Texture_Bruh = BasePlate:FindFirstChildOfClass("Texture")
+                if getgenv().Workspace:FindFirstChild("Baseplate") then
+                    local BasePlate_0 = getgenv().Workspace:FindFirstChild("Baseplate")
+                    local BasePlate_1 = getgenv().Workspace:FindFirstChild("Game"):FindFirstChild("Baseplate")
 
-                BasePlate.Transparency = BasePlateMICUPTransparency
-                Texture_Bruh.Transparency = BasePlateMICUPTransparency
+                    BasePlate_0.Transparency = BasePlateMICUPTransparency
+                    BasePlate_1.Transparency = BasePlateMICUPTransparency
+                    Baseplate_1:FindFirstChild("Texture").Transparency = BasePlateMICUPTransparency
+                elseif not getgenv().Workspace:FindFirstChild("Baseplate") then
+                    BasePlate = game:GetService("Workspace"):FindFirstChild("Game"):FindFirstChild("Baseplate")
+                    local Texture_Bruh = BasePlate:FindFirstChildOfClass("Texture")
+
+                    BasePlate.Transparency = BasePlateMICUPTransparency
+                    Texture_Bruh.Transparency = BasePlateMICUPTransparency
+                end
             elseif getgenv().Workspace:FindFirstChild("Baseplate") then
                 local Base_plate = getgenv().Workspace:FindFirstChild("Baseplate")
 
@@ -8641,85 +8655,7 @@
         Settings.Keybind = tostring(TheBind)
         local Humanoid = getgenv().Humanoid
     end,})--]]
-
-    -- // Save this for later, because we can use this code to individually grab the Tic Tac Toe Model's and rename them and Parent them to a different Folder, will introduce this probably in the next couple updates.
-    -- // 12/16/2024 - 12:56 PM (EST) Edited.
-    --[[local models = {}
-    for _, obj in pairs(workspace:GetChildren()) do
-        if obj:IsA("Model") and obj.Name == "Tic Tac Toe" then
-            table.insert(models, obj)
-        end
-    end
-
-    local folder = workspace:FindFirstChild("SelectedTicTacToe") or Instance.new("Folder")
-    folder.Name = "SelectedTicTacToe"
-    folder.Parent = workspace
-
-    for i, model in ipairs(models) do
-        model.Name = "TicTac-" .. i
-        model.Parent = folder
-    end--]]
     if game.PlaceId == 6884319169 or game.PlaceId == 15546218972 or game.PlaceId == 80080558412215 then
-        for _, model in pairs(workspace:GetDescendants()) do
-            if model:IsA("Model") and model.Name == "Tic Tac Toe" then
-                local parent_to = game:GetService("Workspace"):FindFirstChild("PartStorage")
-                model.Parent = parent_to
-                if model.Parent == parent_to then
-                    print("True - Tic Tac Toe [Board(s) = 3]")
-                else
-                    warn("False - Tic Tac Toe [Unable to identify location./nil] = nil")
-                end
-            end
-        end
-        wait(0.2)
-        if getgenv().tic_tac then
-            print("// << -- Authenticated -- >>")
-            warn("// <-- Even though you likely returned the correct table/boolean/BoolValue [getgenv().tic_tac] <.here.>, it still works so, fuck off, I'll fix it when I feel like it -->")
-        else
-            if game:GetService("Workspace"):FindFirstChild("PartStorage"):FindFirstChild("Tic Tac Toe") then
-                print("Table Found: Tic Tac Toe [Boards(x3) ~= nil]")
-                print("// Cached return value. --")
-                warn("/#/ <<-- game:GetService('Workspace'):WaitForChild('PartStorage'):WaitForChild('Tic Tac Toe') ~= nil // .. We're not returning nil here, since we have correctly allocated table in our local startup. [initialization stage.]\nnever-the-less, do not acquire wrong memory table\nresulting in not-so-necessary errors appearing out of nowhere, since 'Tic Tac Toe' is located in just Workspace and has duplicates with the same 'Name' and 'ClassName'.")
-            else
-                warn("// Returning nil here, causing our functions to essentially eradicate themselves due to our selfishness of trying to prioritize performance over having a brain // :: \n So why now have it error out and not fix it like normal? Fuck you Solara, 60 FPS capped retard.")
-                function clickAllTheDetectors()
-                    local clickDetectors = {}
-            
-                    for _, model in pairs(workspace:GetDescendants()) do
-                        if model:IsA("Model") and model.Name == "Tic Tac Toe" then
-                            for _, part in pairs(model:GetDescendants()) do
-                                if part:IsA("Part") then
-                                    local clickDetector = part:FindFirstChildOfClass("ClickDetector")
-                                    if clickDetector then
-                                        table.insert(clickDetectors, clickDetector)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                    
-                    for _, clickDetector in pairs(clickDetectors) do
-                        clickDetector.MaxActivationDistance = 9999
-                        fireclickdetector(clickDetector, 999)
-                        fireclickdetector(clickDetector, 999)
-                        fireclickdetector(clickDetector, 999)
-                    end
-                end
-            end
-        end
-
-        function click_all_alt()
-            local PartStorage = game.Workspace.PartStorage
-            local TicTacToe = PartStorage:FindFirstChild("Tic Tac Toe")
-            if TicTacToe then
-                for _, v in ipairs(TicTacToe:GetDescendants()) do
-                    if v:IsA("ClickDetector") then
-                        fireclickdetector(v, 999)
-                    end
-                end
-            end
-        end
-
         local boardCount = 0
 
         for _, model in pairs(workspace:GetDescendants()) do
@@ -8746,7 +8682,23 @@
         getgenv().ClickingAllBoards = Tab5:CreateButton({
         Name = "Click All TicTacToe Boards",
         Callback = function()
-            clickAllTheDetectors()
+            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 1"]:GetDescendants()) do
+                if v:IsA("ClickDetector") then
+                    fireclickdetector(v, 999)
+                end
+            end
+            wait()
+            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 2"]:GetDescendants()) do
+                if v:IsA("ClickDetector") then
+                    fireclickdetector(v, 999)
+                end
+            end
+            wait()
+            for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 3"]:GetDescendants()) do
+                if v:IsA("ClickDetector") then
+                    fireclickdetector(v, 999)
+                end
+            end
         end,})
 
         getgenv().LoopClickAllBoards = Tab5:CreateToggle({
@@ -8757,8 +8709,24 @@
             if ClickAll then
                 getgenv().doAllClicks = true
                 while getgenv().doAllClicks do
-                    wait(1)
-                    clickAllTheDetectors()
+                    wait(0.6)
+                    for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 1"]:GetDescendants()) do
+                        if v:IsA("ClickDetector") then
+                            fireclickdetector(v, 999)
+                        end
+                    end
+                    wait()
+                    for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 2"]:GetDescendants()) do
+                        if v:IsA("ClickDetector") then
+                            fireclickdetector(v, 999)
+                        end
+                    end
+                    wait()
+                    for _, v in ipairs(workspace.PartStorage["Tic Tac Toe 3"]:GetDescendants()) do
+                        if v:IsA("ClickDetector") then
+                            fireclickdetector(v, 999)
+                        end
+                    end
                 end
             else
                 getgenv().doAllClicks = false
@@ -8926,7 +8894,7 @@
     end
 
     getgenv().bruhAntiTPMethod3 = Tab2:CreateButton({
-    Name = "Anti Bang/TP (Method 3, They Die)",
+    Name = "Anti Bang/TP (Method 3, They Die To)",
     Callback = function()
         local OldDestroy_Height = getgenv().Workspace.FallenPartsDestroyHeight
         local voidPosition = Vector3.new(-499, -499, -499)
@@ -9112,15 +9080,26 @@
         getgenv().Lighting.Technology = Enum.Technology.Compatibility
     end
 
+    getgenv().use_new_meterials = function(toggle)
+        if toggle == true then
+            getgenv().MaterialService.Use2022Materials = true
+        elseif toggle == false then
+            getgenv().MaterialService.Use2022Materials = false
+        else
+            getgenv().notify("Failure", "You provided an unknown or incorrect argument.", 6)
+            return warn("Unknown argument provided.")
+        end
+    end
+
     getgenv().LightingReset = Tab9:CreateButton({
     Name = "Reset Lighting",
     Callback = function()
         resetLightingSettings()
         wait(0.3)
-        if getgenv().MaterialService.Use2022Materials == false then
-            getgenv().material_toggle(true)
-        else
+        if getgenv().MaterialService.Use2022Materials or getgenv().MaterialService.Use2022Materials == true then
             getgenv().notify("True", "'Use2022Materials' is enabled | Continue.", 7)
+        else
+            getgenv().material_toggle(true)
         end
     end,})
 
