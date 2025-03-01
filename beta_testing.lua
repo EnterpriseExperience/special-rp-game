@@ -11949,7 +11949,26 @@
         warn("Your executor does not support file functions.")
     end
 
+    getgenv().currentSettings = getgenv().currentSettings or {}
     local ez_folder_settings = "SettingsConfigs"
+
+    local settingsList = {
+        "Clock Time GUI", "Use Custom Animation Packages", "Death On Load", "Infinite Yield Premium",
+        "Auto Execute System Broken", "Anti AFK", "Emote Keybinds", "Fully Loaded Message",
+        "Big Baseplate", "TP Tool", "Loading Screen", "Old Materials"
+    }
+
+    for _, setting in ipairs(settingsList) do
+        local configPath = ez_folder_settings .. "/" .. setting .. ".txt"
+        
+        if isfile(configPath) then
+            local configValue = readfile(configPath)
+            getgenv().currentSettings[setting] = configValue
+            getgenv().notify("Loaded: " .. setting .. " -> " .. configValue)
+        else
+            getgenv().currentSettings[setting] = "Off"
+        end
+    end
 
     if not isfolder(ez_folder_settings) then
         makefolder(ez_folder_settings)
