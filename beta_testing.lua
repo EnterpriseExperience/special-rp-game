@@ -1282,9 +1282,98 @@
     -- Start searching for the 'Game' Folder located in Workspace, and modify they're "Parent" them somewhere else, and the Part 'Teleport' as well, so we are invincible to that platform game where the soccer thing is.
     local GameFolder = getgenv().Workspace:FindFirstChild("Game")
     local GetTeleportPart = GameFolder and GameFolder:FindFirstChild("Teleport")
-    local AssetService = game:GetService("AssetService")
-    local Asset_Service_Duplicate = game:GetService("AssetService")
+    local AssetService = getgenv().AssetService
+    local Asset_Service_Duplicate = getgenv().AssetService
     -- I fixed this function for resetting lighting, and now starts up automatically.
+    
+    getgenv().reset_all_lighting_settings_to_default = function()
+        local Lighting = getgenv().Lighting
+        local SunRays = Lighting:FindFirstChildOfClass("SunRaysEffect")
+
+        Lighting.ClockTime = 14.5
+        Lighting.Brightness = 3
+        wait()
+        if not Lighting:FindFirstChildOfClass("Atmosphere") then
+            warn("Atmosphere not found, creating...")
+            wait(0.1)
+            local Atmosphere = Instance.new("Atmosphere")
+            Atmosphere.Name = "Atmosphere"
+            Atmosphere.Parent = Lighting
+            Atmosphere.Density = 0.3
+            Atmosphere.Offset = 0.25
+            Atmosphere.Color = Color3.fromRGB(199, 199, 199)
+            Atmosphere.Decay = Color3.fromRGB(106, 112, 125)
+            Atmosphere.Glare = 0
+            Atmosphere.Haze = 0
+        else
+            print("Atmosphere found, continuing...")
+            wait(0.1)
+            Lighting.Atmosphere.Density = 0.3
+            Lighting.Atmosphere.Offset = 0.25
+            Lighting.Atmosphere.Color = Color3.fromRGB(199, 199, 199)
+            Lighting.Atmosphere.Decay = Color3.fromRGB(106, 112, 125)
+            Lighting.Atmosphere.Glare = 0
+            Lighting.Atmosphere.Haze = 0
+        end
+        wait(0.1)
+        if not Lighting:FindFirstChildOfClass("BloomEffect") then
+            warn("Bloom was not found, creating...")
+            wait(0.1)
+            local Bloom = Instance.new("BloomEffect")
+            Bloom.Name = "Bloom"
+            Bloom.Parent = Lighting
+            Bloom.Intensity = 1
+            Bloom.Enabled = true
+            Bloom.Size = 24
+            Bloom.Threshold = 2
+        else
+            print("Found Bloom, continuing...")
+            wait(0.1)
+            Lighting.Bloom.Intensity = 1
+            Lighting.Bloom.Enabled = true
+            Lighting.Bloom.Size = 24
+            Lighting.Bloom.Threshold = 2
+        end
+        wait(0.1)
+        if not Lighting:FindFirstChildOfClass("DepthOfFieldEffect") then
+            warn("DepthOfField not found, creating...")
+            wait(0.1)
+            local DepthOfField = Instance.new("DepthOfFieldEffect")
+            DepthOfField.Name = "DepthOfField"
+            DepthOfField.Parent = Lighting
+            DepthOfField.Enabled = false
+            DepthOfField.FarIntensity = 0.1
+            DepthOfField.FocusDistance = 0.05
+            DepthOfField.InFocusRadius = 30
+            DepthOfField.NearIntensity = 0.75
+        else
+            print("DepthOfField found, continuing...")
+            wait(0.1)
+            Lighting.DepthOfField.Enabled = false
+            Lighting.DepthOfField.FarIntensity = 0.1
+            Lighting.DepthOfField.FocusDistance = 0.05
+            Lighting.DepthOfField.InFocusRadius = 30
+            Lighting.DepthOfField.NearIntensity = 0.75
+        end
+        wait(0.1)
+        if not Lighting:FindFirstChildOfClass("SunRaysEffect") then
+            warn("SunRays was not found, creating...")
+            wait(0.1)
+            local SunRays = Instance.new("SunRaysEffect")
+            SunRays.Name = "SunRays"
+            SunRays.Parent = Lighting
+            SunRays.Enabled = true
+            SunRays.Intensity = 0.01
+            SunRays.Spread = 0.1
+        else
+            print("SunRays found, continuing...")
+            wait(0.1)
+            Lighting.SunRays.Enabled = true
+            Lighting.SunRays.Intensity = 0.01
+            Lighting.SunRays.Spread = 0.1
+        end
+    end
+
     function resetLightingSettings()
         -- Check it out, let me know what you think.
         local Lighting = game:GetService("Lighting")
@@ -8926,8 +9015,8 @@
         if toggleRainbowAmbientInf then
             getgenv().AmbientChangerEnabled = true
             wait()
-            local TweenService = game:GetService("TweenService")
-            local Lighting = game:GetService("Lighting")
+            local TweenService = getgenv().TweenService
+            local Lighting = getgenv().Lighting
 
             local colors = {
                 Color3.fromRGB(255, 165, 0),
@@ -8992,6 +9081,8 @@
     Callback = function()
         getgenv().AmbientChooser:Set(Color3.fromRGB(0, 0, 0))
         getgenv().RainbowAmbient:Set(false)
+        wait(0.2)
+        getgenv().Lighting.Ambient = Color3.fromRGB(0, 0, 0)
     end})
 
     getgenv().ChooseLightingTechnology = Tab9:CreateDropdown({
@@ -9026,7 +9117,7 @@
     Callback = function()
         resetLightingSettings()
         wait(0.3)
-        if game:GetService("MaterialService").Use2022Materials == false then
+        if getgenv().MaterialService.Use2022Materials == false then
             getgenv().material_toggle(true)
         else
             getgenv().notify("True", "'Use2022Materials' is enabled | Continue.", 7)
@@ -11900,6 +11991,109 @@
         getgenv().modifiedTPToolBruh = TPToolBackpack
         getgenv().Easies_Configuration["keep_tp_tool"] = TPToolBackpack and "on" or "off"
     end,})--]]
+
+    if not (readfile and writefile) then
+        warn("Your executor does not support file functions.")
+    end
+
+    local ez_folder_settings = "SettingsConfigs"
+
+    if not isfolder(ez_folder_settings) then
+        makefolder(ez_folder_settings)
+    else
+        warn("Folder already exists: " .. ez_folder_settings)
+    end
+
+    if readfile and writefile then
+        function auto_load_ez()
+            local settingsList = {
+                "Clock Time GUI", "Use Custom Animation Packages", "Death On Load", "Infinite Yield Premium",
+                "Auto Execute System Broken", "Anti AFK", "Emote Keybinds", "Fully Loaded Message",
+                "Big Baseplate", "TP Tool", "Loading Screen", "Old Materials"
+            }
+
+            for _, setting in ipairs(settingsList) do
+                local configPath = configFolder .. "/" .. setting .. ".txt"
+                
+                if isfile(configPath) then
+                    local configValue = readfile(configPath)
+                    getgenv().currentSettings[setting] = configValue
+                    getgenv().notify("Loaded: " .. setting .. " -> " .. configValue)
+                else
+                    getgenv().currentSettings[setting] = "Off"
+                end
+            end
+        end
+
+        function auto_delete_ez()
+            local configPath = "SettingsConfigs/"
+
+            if not isfolder(configPath) then
+                return getgenv().notify("Failure!", "Configuration Folder does not exist!", 6)
+            end
+
+            delfolder(configPath)
+            getgenv().notify("Deleted Config: " .. configName)
+        end
+
+        function auto_save_ez(configName, configValue)
+            local configPath = "SettingsConfigs/" .. configName .. ".txt"
+
+            if isfile(configPath) then
+                warn("Overwriting existing configuration: " .. configName)
+            end
+
+            writefile(configPath, configValue)
+            getgenv().notify("Saved Config: " .. configName .. " -> " .. configValue)
+        end
+        wait()
+        getgenv().SelectSettingsToModify = Tab20:CreateDropdown({
+        Name = "Modify Setting Configuration",
+        Options = {"Clock Time GUI", "Use Custom Animation Packages", "Death On Load", "Infinite Yield Premium", "Auto Execute System Broken", "Anti AFK", "Emote Keybinds", "Fully Loaded Message", "Big Baseplate", "TP Tool", "Loading Screen", "Old Materials"},
+        CurrentOption = "Clock Time GUI",
+        MultipleOptions = false,
+        Flag = "fallBackSettingsConfigurationList",
+        Callback = function(selected_Setting)
+            getgenv().notify("Selected: " .. tostring(selected_Setting))
+            getgenv().currentSetting = selected_Setting
+        end,})
+
+        getgenv().changeValueForSettingsConfigs = Tab20:CreateDropdown({
+        Name = "Change Value To Selected Setting",
+        Options = {"On", "Off"},
+        CurrentOption = "Off",
+        MultipleOptions = false,
+        Flag = "ModifyingOptionalConfigurationSettings",
+        Callback = function(selected_setting_value)
+            if getgenv().currentSetting then
+                local ez_config_path = ez_folder_settings .. "/" .. getgenv().currentSetting .. ".txt"
+                writefile(ez_config_path, selected_setting_value)
+                getgenv().notify("Updated: " .. getgenv().currentSetting .. " to " .. selected_setting_value)
+            else
+                getgenv().notify("No setting selected.")
+            end
+        end,})
+
+        getgenv().LoadingTheConfiguration = Tab20:CreateButton({
+        Name = "Load Easy Configuration",
+        Callback = function()
+            auto_load_ez()
+        end,})
+
+        getgenv().SavingTheConfiguration = Tab20:CreateButton({
+        Name = "Save Ez Configuration",
+        Callback = function()
+            auto_save_ez()
+        end,})
+
+        getgenv().DeleteTheConfiguration = Tab20:CreateButton({
+        Name = "Delete Entire Configuration",
+        Callback = function()
+            auto_delete_ez()
+        end,})
+    else
+        warn("Your executor does not support 'readfile' or 'writefile'!")
+    end
 
     getgenv().FakeOutScript = Tab15:CreateToggle({
     Name = "Fake Out",
