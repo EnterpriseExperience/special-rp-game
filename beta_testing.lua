@@ -12014,18 +12014,23 @@
             end
 
             delfolder(configPath)
-            getgenv().notify("Deleted Config: " .. configName)
+            getgenv().notify("Success:", "Deleted Easy Configuration.", 6)
         end
 
-        function auto_save_ez(configName, configValue)
-            local configPath = "SettingsConfigs/" .. configName .. ".txt"
+        function auto_save_ez()
+            local settingsList = { 
+                "Clock Time GUI", "Use Custom Animation Packages", "Death On Load", "Infinite Yield Premium",
+                "Auto Execute System Broken", "Anti AFK", "Emote Keybinds", "Fully Loaded Message",
+                "Big Baseplate", "TP Tool", "Loading Screen", "Old Materials"
+            }
 
-            if isfile(configPath) then
-                warn("Overwriting existing configuration: " .. configName)
+            for _, setting in ipairs(settingsList) do
+                local configPath = ez_folder_settings .. "/" .. setting .. ".txt"
+                local configValue = getgenv().currentSettings[setting] or "Off"
+
+                writefile(configPath, configValue)
+                getgenv().notify("Saved: " .. setting .. " -> " .. configValue)
             end
-
-            writefile(configPath, configValue)
-            getgenv().notify("Saved Config: " .. configName .. " -> " .. configValue)
         end
         wait()
         getgenv().SelectSettingsToModify = Tab20:CreateDropdown({
