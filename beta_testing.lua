@@ -8661,36 +8661,38 @@
         local boardCount = 0
         local boards = {}
 
-        for _, model in pairs(workspace:GetDescendants()) do
+        local partStorage = getgenv().Workspace:FindFirstChild("PartStorage")
+        if not partStorage then
+            return warn("PartStorage folder not found in Workspace!")
+        end
+
+        for _, model in ipairs(partStorage:GetChildren()) do
             if model:IsA("Model") and model.Name == "Tic Tac Toe" then
-                local parent_to = getgenv().Workspace:FindFirstChild("PartStorage")
-                if parent_to then
-                    boardCount = boardCount + 1
-                    model.Name = "Tic Tac Toe " .. boardCount
-                    model.Parent = parent_to
-                    boards[boardCount] = model
-                    
-                    if model.Parent == parent_to then
-                        print("Renamed & Moved: Tic Tac Toe " .. boardCount)
-                    else
-                        warn("Failed to move: Tic Tac Toe " .. boardCount)
-                    end
-                else
-                    warn("PartStorage not found!")
-                end
+                boardCount = boardCount + 1
+                model.Name = "Tic Tac Toe " .. boardCount
+                boards[boardCount] = model
+                print("Renamed: Tic Tac Toe " .. boardCount)
             end
         end
 
         function clickBoard(boardName)
-            local board = getgenv().Workspace:FindFirstChild("PartStorage"):FindFirstChild(boardName)
+            local board = partStorage:FindFirstChild(boardName)
             if board then
+                local clicked = false
                 for _, v in ipairs(board:GetDescendants()) do
                     if v:IsA("ClickDetector") then
-                        fireclickdetector(v, 999)
+                        v.MaxActivationDistance = 9999
+                        wait()
+                        fireclickdetector(v)
+                        clicked = true
                     end
                 end
+                task.wait()
+                if not clicked then
+                    warn("No ClickDetector found in " .. boardName)
+                end
             else
-                warn("Board not found: " .. tostring(boardName))
+                warn("Board not found: " .. boardName)
             end
         end
 
@@ -8699,7 +8701,7 @@
         Callback = function()
             for i = 1, boardCount do
                 clickBoard("Tic Tac Toe " .. i)
-                wait()
+                wait(0.1)
             end
         end,})
 
@@ -8713,23 +8715,23 @@
                 for i = 1, boardCount do
                     clickBoard("Tic Tac Toe " .. i)
                 end
-                wait(0.7)
+                wait(0.5)
             end
         end,})
 
-        getgenv().ClickBoardNumberOne = Tab5:CreateButton({
+        getgenv().TicTacToeBoardOne = Tab5:CreateButton({
         Name = "Click TicTacToe Board 1",
         Callback = function()
             clickBoard("Tic Tac Toe 1")
         end,})
 
-        getgenv().ClickBoardNumberTwo = Tab5:CreateButton({
+        getgenv().TicTacToeBoardTwo = Tab5:CreateButton({
         Name = "Click TicTacToe Board 2",
         Callback = function()
             clickBoard("Tic Tac Toe 2")
         end,})
 
-        getgenv().ClickBoardNumberThree = Tab5:CreateButton({
+        getgenv().TicTacToeBoardThree = Tab5:CreateButton({
         Name = "Click TicTacToe Board 3",
         Callback = function()
             clickBoard("Tic Tac Toe 3")
