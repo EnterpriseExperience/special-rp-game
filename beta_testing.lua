@@ -12027,7 +12027,7 @@
         getgenv().SelectSettingsToModify = Tab20:CreateDropdown({
         Name = "Modify Setting Configuration",
         Options = {"Clock Time GUI", "Use Custom Animation Packages", "Death On Load", "Infinite Yield Premium", "Auto Execute System Broken", "Anti AFK", "Emote Keybinds", "Fully Loaded Message", "Big Baseplate", "TP Tool", "Loading Screen", "Old Materials"},
-        CurrentOption = "Clock Time GUI",
+        CurrentOption = "",
         MultipleOptions = false,
         Flag = "fallBackSettingsConfigurationList",
         Callback = function(selected_Setting)
@@ -12130,10 +12130,8 @@
     getgenv().Reset_ClockTime_GUI = Tab15:CreateButton({
     Name = "Disable Script Clock Time GUI",
     Callback = function()
-        local Players = cloneref and cloneref(game:GetService("Players")) or game:GetService("Players")
-        local Lighting = cloneref and cloneref(game:GetService("Lighting")) or game:GetService("Lighting")
-        local LocalPlayer = Players.LocalPlayer
-        local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 0.5)
+        local Lighting = getgenv().Lighting
+        local PlayerGui = getgenv().PlayerGui
         local Find_Script_Clock_GUI = PlayerGui:FindFirstChild("Script_Clock_Time_Day_Night")
 
         if Find_Script_Clock_GUI then
