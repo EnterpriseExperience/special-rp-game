@@ -3011,9 +3011,19 @@
         })
     end,})
     wait()
+    local RunService = getgenv().RunService
+    local Players = getgenv().Players
+    local UserInputService = getgenv().UserInputService
+    local Player = getgenv().LocalPlayer
+    local Character = getgenv().Character
+    local RootPart = getgenv().HumanoidRootPart
+
+    local isHoldingJump = false
+    local isHoldingKey = false
+
     if not getgenv().CFrameSpeed then
         getgenv().CFrameSpeed = {
-            Enabled = true,
+            Enabled = false,
             Speed = 1.5,
             Keybind = Enum.KeyCode.LeftShift
         }
@@ -3021,9 +3031,10 @@
 
     if not getgenv().CFrameJump then
         getgenv().CFrameJump = {
-            Enabled = true,
+            Enabled = false,
             JumpPower = nil,
-            JumpHeight = nil
+            JumpHeight = nil,
+            Keybind = Enum.KeyCode.Space
         }
 
         local Character = getgenv().Character
@@ -3033,43 +3044,42 @@
             if Humanoid.UseJumpPower then
                 getgenv().CFrameJump.JumpPower = 2
             else
-                getgenv().CFrameJump.JumpHeight = 1
+                getgenv().CFrameJump.JumpHeight = 2
             end
         end
     end
+
     wait(0.2)
+
     getgenv().CFrameSpeedSlider = Tab2:CreateSlider({
     Name = "CFrame WalkSpeed Set Speed",
     Range = {1, 25},
     Increment = 1,
-    Suffix = "",
     CurrentValue = 2,
     Flag = "DirectCFrameSpeedEditor",
-    Callback = function(newCFrameSpeedInput)
-        getgenv().CFrameSpeed.Speed = newCFrameSpeedInput
+    Callback = function(newSpeed)
+        getgenv().CFrameSpeed.Speed = newSpeed
     end,})
 
-    if getgenv().Humanoid.UseJumpPower or getgenv().Humanoid.UseJumpPower == true then
+    if getgenv().Humanoid.UseJumpPower then
         getgenv().JumpPowerSpeedSlider = Tab2:CreateSlider({
-        Name = "Set CFrame JumpPower (not working rn)",
+        Name = "Set CFrame JumpPower",
         Range = {1, 30},
         Increment = 1,
-        Suffix = "",
         CurrentValue = 1,
         Flag = "JPAuraCFrameMethod",
-        Callback = function(jp_cframe_method)
-            getgenv().CFrameJump.JumpPower = jp_cframe_method
+        Callback = function(value)
+            getgenv().CFrameJump.JumpPower = value
         end,})
     else
         getgenv().JumpHeightSpeedSlider = Tab2:CreateSlider({
-        Name = "Set CFrame JumpHeight (not working rn)",
+        Name = "Set CFrame JumpHeight",
         Range = {1, 40},
         Increment = 1,
-        Suffix = "",
         CurrentValue = 1,
         Flag = "JumpHeightCFrameMethod",
-        Callback = function(height_jump_method)
-            getgenv().CFrameJump.JumpHeight = height_jump_method
+        Callback = function(value)
+            getgenv().CFrameJump.JumpHeight = value
         end,})
     end
 
@@ -3086,32 +3096,22 @@
     CurrentKeybind = "LeftShift",
     HoldToInteract = false,
     Flag = "GetCFrameSpeedKeyCode",
-    Callback = function(keyMemberForCFrameSpeed)
-        if typeof(keyMemberForCFrameSpeed) == "string" and Enum.KeyCode[keyMemberForCFrameSpeed] then
-            getgenv().CFrameSpeed.Keybind = Enum.KeyCode[keyMemberForCFrameSpeed]
+    Callback = function(key)
+        if typeof(key) == "string" and Enum.KeyCode[key] then
+            getgenv().CFrameSpeed.Keybind = Enum.KeyCode[key]
         else
             getgenv().CFrameSpeed.Keybind = Enum.KeyCode.LeftShift
         end
     end,})
 
-    local RunService = getgenv().RunService
-    local Players = getgenv().Players
-    local UserInputService = getgenv().UserInputService
-    local Player = getgenv().LocalPlayer
-    local Character = getgenv().Character
-    local RootPart = getgenv().HumanoidRootPart
-
-    local isHoldingKey = false
-    if getgenv().CFrame_Speed_Connection_Started then
-        getgenv().activeConnection = nil
-    end
-    wait()
     local function startMovementLoop()
-        if getgenv().CFrame_Speed_Connection_Started then getgenv().CFrame_Speed_Connection_Started:Disconnect() end
+        if getgenv().CFrame_Speed_Connection_Started then
+            getgenv().CFrame_Speed_Connection_Started:Disconnect()
+        end
 
         getgenv().CFrame_Speed_Connection_Started = RunService.RenderStepped:Connect(function()
             if getgenv().CFrameSpeed.Enabled and isHoldingKey and RootPart then
-                local Humanoid = Character and Character:FindFirstChildWhichIsA("Humanoid")
+                local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
                 if Humanoid and Humanoid.MoveDirection.Magnitude > 0 then
                     RootPart.CFrame = RootPart.CFrame + (Humanoid.MoveDirection * getgenv().CFrameSpeed.Speed)
                 end
@@ -3126,29 +3126,13 @@
         end
     end
 
-    Player.CharacterAdded:Connect(function(newCharacter)
-        Character = newCharacter
-        RootPart = Character:WaitForChild("HumanoidRootPart")
-        if getgenv().CFrameSpeed.Enabled then
-            startMovementLoop()
+    local function startJumpLoop()
+        if getgenv().CFrame_Jump_Connection_Started then
+            getgenv().CFrame_Jump_Connection_Started:Disconnect()
         end
-    end)
 
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == getgenv().CFrameSpeed.Keybind then
-            isHoldingKey = true
-        end
-    end)
-
-    UserInputService.InputEnded:Connect(function(input, gameProcessed)
-        if input.KeyCode == getgenv().CFrameSpeed.Keybind then
-            isHoldingKey = false
-        end
-    end)
-
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == getgenv().CFrameJump.Keybind and getgenv().CFrameJump.Enabled then
-            if RootPart then
+        getgenv().CFrame_Jump_Connection_Started = RunService.RenderStepped:Connect(function()
+            if getgenv().CFrameJump.Enabled and isHoldingJump and RootPart then
                 local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
                 if Humanoid then
                     if Humanoid.UseJumpPower then
@@ -3158,18 +3142,57 @@
                     end
                 end
             end
+        end)
+    end
+
+    local function stopJumpLoop()
+        if getgenv().CFrame_Jump_Connection_Started then
+            getgenv().CFrame_Jump_Connection_Started:Disconnect()
+            getgenv().CFrame_Jump_Connection_Started = nil
+        end
+    end
+
+    Player.CharacterAdded:Connect(function(newCharacter)
+        Character = newCharacter
+        RootPart = Character:WaitForChild("HumanoidRootPart")
+
+        if getgenv().CFrameSpeed.Enabled then
+            startMovementLoop()
+        end
+
+        if getgenv().CFrameJump.Enabled then
+            startJumpLoop()
+        end
+    end)
+
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed then
+            if input.KeyCode == getgenv().CFrameJump.Keybind then
+                isHoldingJump = true
+            elseif input.KeyCode == getgenv().CFrameSpeed.Keybind then
+                isHoldingKey = true
+            end
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.KeyCode == getgenv().CFrameJump.Keybind then
+            isHoldingJump = false
+        elseif input.KeyCode == getgenv().CFrameSpeed.Keybind then
+            isHoldingKey = false
         end
     end)
 
     getgenv().JPCFrameToggle = Tab2:CreateToggle({
-    Name = "JumpPower CFrame (not working rn)",
+    Name = "JumpPower CFrame",
     CurrentValue = false,
     Flag = "JPToggleForCFrame",
-    Callback = function(JPTheCFrameMethod)
-        if JPTheCFrameMethod then
-            getgenv().CFrameJump.Enabled = true
+    Callback = function(state)
+        getgenv().CFrameJump.Enabled = state
+        if state then
+            startJumpLoop()
         else
-            getgenv().CFrameJump.Enabled = false
+            stopJumpLoop()
         end
     end,})
 
@@ -3177,16 +3200,17 @@
     Name = "CFrame Speed (With Keybind)",
     CurrentValue = false,
     Flag = "CFrameSpeedingScript",
-    Callback = function(toggledTheCFrameSpeed)
-        getgenv().CFrameSpeed.Enabled = toggledTheCFrameSpeed
-
-        if toggledTheCFrameSpeed then
+    Callback = function(state)
+        getgenv().CFrameSpeed.Enabled = state
+        if state then
             startMovementLoop()
         else
             stopMovementLoop()
         end
     end,})
-
+    wait(0.2)
+    stopMovementLoop()
+    wait(0.1)
     getgenv().FrozenChar = Tab2:CreateToggle({
     Name = "Freeze Your Character",
     CurrentValue = false,
