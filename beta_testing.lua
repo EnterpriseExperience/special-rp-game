@@ -815,83 +815,6 @@
         restoreOriginalMaterials()
     end
     wait(0.2)
-    getgenv().defaulting_keybind_for_muting_microphone = "RightControl"
-    wait(0.2)
-    local Workspace
-    local Players
-    local ReplicatedStorage
-    local UserInputService
-    wait(0.1)
-    if cloneref then
-        print("Using cloneref for Muted keybind.")
-        Workspace = cloneref(game:GetService("Workspace"))
-        Players = cloneref(game:GetService("Players"))
-        ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
-        UserInputService = cloneref(game:GetService("UserInputService"))
-    else
-        warn("'cloneref' is unsupported, utilizing normal method of Services.")
-        Workspace = game:GetService("Workspace")
-        Players = game:GetService("Players")
-        ReplicatedStorage = game:GetService("ReplicatedStorage")
-        UserInputService = game:GetService("UserInputService")
-    end
-    wait(0.2)
-    local UserInputService = getgenv().UserInputService
-    local Players = getgenv().Players
-    local keybindString = getgenv().defaulting_keybind_for_muting_microphone
-    local keybindEnum = Enum.KeyCode[keybindString] or Enum.KeyCode.RightControl
-    getgenv().other_mute_keybind_enum_saved = keybindEnum
-
-    if getgenv().already_loaded_mute_keybind then
-        warn("Already initialized mute keybind.")
-    else
-        if getgenv().LocalPlayer:FindFirstChildOfClass("AudioDeviceInput") then
-            local function toggle_mute()
-                local player = Players.LocalPlayer
-                if not player then return end
-
-                local audioInput = player:FindFirstChildOfClass("AudioDeviceInput")
-                if audioInput then
-                    audioInput.Muted = not audioInput.Muted
-                    getgenv().notify("Success", audioInput.Muted and "Muted Microphone." or "Unmuted Microphone.", 6)
-                end
-            end
-
-            UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                if gameProcessed then return end
-                if input.KeyCode == keybindEnum then
-                    toggle_mute()
-                end
-            end)
-            
-            wait(0.1)
-            getgenv().already_loaded_mute_keybind = true
-        elseif not getgenv().LocalPlayer:FindFirstChildOfClass("AudioDeviceInput") then
-            local function toggle_mute()
-                local player = getgenv().LocalPlayer
-                if not player then return end
-
-                getgenv().VoiceChatInternal:SubscribePause(player.UserId, not getgenv().VoiceChatInternal:IsSubscribePaused(player.UserId))
-                wait(0.1)
-                local vc_result_paused = getgenv().VoiceChatInternal:IsSubscribePaused(player.UserId)
-
-                getgenv().notify("Success", vc_result_paused and "Muted Microphone." or "Unmuted Microphone.", 6)
-            end
-
-            UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                if gameProcessed then return end
-                if input.KeyCode == keybindEnum then
-                    toggle_mute()
-                end
-            end)
-
-            wait(0.1)
-            getgenv().already_loaded_mute_keybind = true
-        else
-            warn("Voice Chat is either not turned on or is not enabled in the current game | Cannot load 'Mute Keybind'.")
-        end
-    end
-    wait(0.2)
     if game.PlaceId == 6884319169 or game.PlaceId == 15546218972 then
         if getgenv().conveyer_stored then
             warn("Already stored conveyer's")
@@ -2883,6 +2806,10 @@
         Callback = function(unclaimTheirBooth)
             local Folder = getgenv().Workspace.Booth
             local find_plr_func_booth = findplr(unclaimTheirBooth)
+
+            if getgenv().boothWhitelistingPlayer and getgenv().boothWhitelistingPlayer[find_plr_func_booth] then
+                return getgenv().notify("Failure", "This user is on the Booth Whitelist!", 6)
+            end
 
             getgenv().notify("Note:", "Make sure you are not invisible when doing this!", 6.5)
             task.wait(.2)
@@ -7434,17 +7361,91 @@
             end
         end,})
 
-        getgenv().EzMuteKeybind = Tab21:CreateKeybind({
+        getgenv().defaulting_keybind_for_muting_microphone = "LeftControl"
+        wait()
+        getgenv().EzMuteKeybind = Tab21:CreateDropdown({
         Name = "Mute Keybind",
-        CurrentKeybind = "RightControl",
-        HoldToInteract = false,
-        Flag = "MutingMicrophoneKeybind",
+        Options = {"Q","E", "R", "T", "Y", "U", "I", "O", "P", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "Comma", "Period", "Question", "Semicolon", "Colon", "LeftAlt", "RightAlt", "LeftControl", "RightControl", "LeftBracket", "RightBracket", "BackSlash", "Pipe", "LeftCurly", "RightCurly", "Underscore", "Minus", "LeftParenthesis", "RightParenthesis", "Asterisk", "Slash", "GreaterThan", "LessThan", "Backquote", "At", "Equals", "Caret", "Hash", "Dollar", "Percent", "Ampersand", "Quote", "QuotedDouble", "Plus", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "Print", "Help", "Compose", "Menu", "Euro", "ButtonX", "ButtonA", "ButtonY", "ButtonB", "ButtonR1", "ButtonL1", "ButtonL2", "ButtonR2", "ButtonL3", "ButtonStart", "ButtonSelect", "DPadLeft", "DPadRight", "DPadUp", "DPadDown", "Thumbstick1", "Thumbstick2"},
+        CurrentOption = tostring(getgenv().defaulting_keybind_for_muting_microphone),
+        MultipleOptions = false,
+        Flag = "theMuteKeybindUsing",
         Callback = function(theNewKeybindToSet)
-            local newKeybindEnum = Enum.KeyCode[theNewKeybindToSet] or Enum.KeyCode.RightControl
-            getgenv().other_mute_keybind_enum_saved = newKeybindEnum
+            if typeof(theNewKeybindToSet) == "table" then
+                theNewKeybindToSet = theNewKeybindToSet[1]
+            end
+
+            if typeof(theNewKeybindToSet) == "string" and Enum.KeyCode[theNewKeybindToSet] then
+                getgenv().other_mute_keybind_enum_saved = Enum.KeyCode[theNewKeybindToSet]
+                getgenv().defaulting_keybind_for_muting_microphone = theNewKeybindToSet
+            else
+                warn("Invalid keybind selection.")
+            end
         end,})
-    else
-        warn("AudioDeviceInput not detected in current game, not loading.")
+        wait(0.2)
+        if not getgenv().defaulting_keybind_for_muting_microphone then
+            getgenv().defaulting_keybind_for_muting_microphone = tostring(getgenv().defaulting_keybind_for_muting_microphone)
+        end
+
+        local keybindString = getgenv().defaulting_keybind_for_muting_microphone
+
+        if Enum.KeyCode[keybindString] then
+            getgenv().other_mute_keybind_enum_saved = Enum.KeyCode[keybindString]
+        else
+            warn("Invalid keybind string:", keybindString)
+            getgenv().other_mute_keybind_enum_saved = Enum.KeyCode.RightControl
+        end
+
+        local Workspace, Players, ReplicatedStorage, UserInputService
+
+        if cloneref then
+            print("Using cloneref for Muted keybind.")
+            Workspace = cloneref(game:GetService("Workspace"))
+            Players = cloneref(game:GetService("Players"))
+            ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+            UserInputService = cloneref(game:GetService("UserInputService"))
+        else
+            warn("'cloneref' is unsupported, utilizing normal method of Services.")
+            Workspace = game:GetService("Workspace")
+            Players = game:GetService("Players")
+            ReplicatedStorage = game:GetService("ReplicatedStorage")
+            UserInputService = game:GetService("UserInputService")
+        end
+
+        wait(0.2)
+
+        if getgenv().already_loaded_mute_keybind then
+            warn("Already initialized mute keybind.")
+        else
+            local function toggle_mute()
+                local player = Players.LocalPlayer
+                if not player then return end
+
+                if player:FindFirstChildOfClass("AudioDeviceInput") then
+                    local audioInput = player:FindFirstChildOfClass("AudioDeviceInput")
+                    if audioInput then
+                        audioInput.Muted = not audioInput.Muted
+                        getgenv().notify("Success", audioInput.Muted and "Muted Microphone." or "Unmuted Microphone.", 6)
+                    end
+                elseif getgenv().VoiceChatInternal then
+                    getgenv().VoiceChatInternal:SubscribePause(player.UserId, not getgenv().VoiceChatInternal:IsSubscribePaused(player.UserId))
+                    wait(0.1)
+                    local vc_result_paused = getgenv().VoiceChatInternal:IsSubscribePaused(player.UserId)
+                    getgenv().notify("Success", vc_result_paused and "Muted Microphone." or "Unmuted Microphone.", 6)
+                else
+                    warn("Voice Chat is either not turned on or is not enabled in the current game | Cannot load 'Mute Keybind'.")
+                end
+            end
+
+            UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                if gameProcessed then return end
+                if input.KeyCode == getgenv().other_mute_keybind_enum_saved then
+                    toggle_mute()
+                end
+            end)
+
+            wait(0.1)
+            getgenv().already_loaded_mute_keybind = true
+        end
     end
 
     if game.PlaceId == 6884319169 or game.PlaceId == 15546218972 then
@@ -8852,6 +8853,13 @@
         local Humanoid = getgenv().Humanoid
     end,})--]]
     if game.PlaceId == 6884319169 or game.PlaceId == 15546218972 or game.PlaceId == 80080558412215 then
+        local partStorage = getgenv().Workspace:FindFirstChild("PartStorage")
+
+        while not partStorage do
+            task.wait(0.5)
+            partStorage = getgenv().Workspace:FindFirstChild("PartStorage")
+        end
+        
         local boardCount = 0
         local boards = {}
 
@@ -8860,12 +8868,13 @@
             return warn("PartStorage folder not found in Workspace!")
         end
 
-        for _, model in ipairs(partStorage:GetChildren()) do
+        for _, model in ipairs(getgenv().Workspace:GetChildren()) do
             if model:IsA("Model") and model.Name == "Tic Tac Toe" then
                 boardCount = boardCount + 1
                 model.Name = "Tic Tac Toe " .. boardCount
+                model.Parent = partStorage
                 boards[boardCount] = model
-                print("Renamed: Tic Tac Toe " .. boardCount)
+                print("Moved and renamed:", model.Name)
             end
         end
 
@@ -8893,6 +8902,13 @@
         getgenv().ClickingAllBoards = Tab5:CreateButton({
         Name = "Click All TicTacToe Boards",
         Callback = function()
+            boardCount = 0
+            for _, model in ipairs(partStorage:GetChildren()) do
+                if model:IsA("Model") and model.Name:find("Tic Tac Toe") then
+                    boardCount = boardCount + 1
+                end
+            end
+            wait()
             for i = 1, boardCount do
                 clickBoard("Tic Tac Toe " .. i)
                 wait(0.1)
